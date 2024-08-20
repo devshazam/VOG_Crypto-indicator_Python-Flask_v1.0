@@ -24,18 +24,24 @@ btc_usd_30Days = btc.history(period="1mo", interval="1d")
 ### №1 - rolling window (RW)
 def rolling_window():
     rol_RW = btc_usd_90Days['Close'].rolling(window=90, center=False).mean()
+    print('BTC-USD 90Days Close:', btc_usd_90Days['Close'].iloc[-1])
+    print('BTC-USD 90Days RW:', rol_RW.iloc[-1])
     print('Стратегия №1', 'купить' if btc_usd_90Days['Close'].iloc[-1] > rol_RW.iloc[-1] else 'продать')
 
 ### №2 - simple moving average strategy (SMA)
 def simple_moving_average():
     rol_SMA_1 = btc_usd_90Days['Close'].rolling(window=45, center=False).mean()
     rol_SMA_2 = btc_usd_90Days['Close'].rolling(window=90, center=False).mean()
+    print('BTC-USD 90Days SMA1:', rol_SMA_1.iloc[-1])
+    print('BTC-USD 90Days SMA2:', rol_SMA_2.iloc[-1])
     print('Стратегия №2', 'купить' if rol_SMA_1.iloc[-1] > rol_SMA_2.iloc[-1] else 'продать')
 
 ### №3 - exponentially weighted moving average strategy (EWMA)
 def exponentially_weighted_moving_average():
     rol_EWMA_1 = btc_usd_90Days['Close'].ewm(span=5, adjust=True, ignore_na=True).mean()
     rol_EWMA_2 = btc_usd_90Days['Close'].ewm(span=30, adjust=True, ignore_na=True).mean()
+    print('BTC-USD 90Days EWMA1:', rol_EWMA_1.iloc[-1])
+    print('BTC-USD 90Days EWMA2:', rol_EWMA_2.iloc[-1])
     print('Стратегия №3', 'купить' if rol_EWMA_1.iloc[-1] > rol_EWMA_2.iloc[-1] else 'продать')
 
 ### №4 - RSI strategy
@@ -43,6 +49,7 @@ def relative_strength_index():
     stock = sdf.retype(btc_usd_30Days)
     rol_RSI = stock['rsi_14'] # в книге rsi_12
     rol_RSI_result = 'ничего'
+    print('BTC-USD 30Days RSI:', rol_RSI.iloc[-1])
     if rol_RSI.iloc[-1] > 70: # в книге > 90
         rol_RSI_result = 'продать'
     elif rol_RSI.iloc[-1] < 30: # в книге < 10
@@ -55,6 +62,7 @@ def moving_average_convergence_divergence():
     signal = stock['macds']
     macd = stock['macd']
     rol_MACD_result = 'ничего'
+    print('BTC-USD 30Days MACD:', macd.iloc[-1])
     if macd.iloc[-1] > signal.iloc[-1] and macd.iloc[-2] <= signal.iloc[-2]:
         rol_MACD_result = 'купить'
     elif macd.iloc[-1] < signal.iloc[-1] and macd.iloc[-2] >= signal.iloc[-2]:
@@ -68,6 +76,7 @@ def rsi_and_macd():
     signal = stock['macds']
     macd = stock['macd']
     rol_RSI_MACD_result = 'ничего'
+    # print('BTC-USD 30Days RSI:', rsi.iloc[-1])
     if rsi.iloc[-1] < 50 and macd.iloc[-1] > signal.iloc[-1] and macd.iloc[-2] <= signal.iloc[-2]:
         rol_RSI_MACD_result = 'купить'
     elif rsi.iloc[-1] > 50 and macd.iloc[-1] < signal.iloc[-1] and macd.iloc[-2] >= signal.iloc[-2]:
