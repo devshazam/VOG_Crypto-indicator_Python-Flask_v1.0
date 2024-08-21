@@ -17,39 +17,36 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 btc= yf.Ticker("BTC-USD")
 btc_usd_90Days = btc.history(period="3mo", interval="1d")
 btc_usd_30Days = btc.history(period="1mo", interval="1d")
-# print(btc_usd_90Days)
-# print(btc_usd_30Days)
+btc_usd_30Days_Copy = btc_usd_30Days.copy()
+stock = sdf.retype(btc_usd_30Days)
+
+
 
 
 ### №1 - rolling window (RW)
 def rolling_window():
     rol_RW = btc_usd_90Days['Close'].rolling(window=90, center=False).mean()
-    print('BTC-USD 90Days Close:', btc_usd_90Days['Close'].iloc[-1])
-    print('BTC-USD 90Days RW:', rol_RW.iloc[-1])
     print('Стратегия №1', 'купить' if btc_usd_90Days['Close'].iloc[-1] > rol_RW.iloc[-1] else 'продать')
 
 ### №2 - simple moving average strategy (SMA)
 def simple_moving_average():
     rol_SMA_1 = btc_usd_90Days['Close'].rolling(window=45, center=False).mean()
     rol_SMA_2 = btc_usd_90Days['Close'].rolling(window=90, center=False).mean()
-    print('BTC-USD 90Days SMA1:', rol_SMA_1.iloc[-1])
-    print('BTC-USD 90Days SMA2:', rol_SMA_2.iloc[-1])
+
     print('Стратегия №2', 'купить' if rol_SMA_1.iloc[-1] > rol_SMA_2.iloc[-1] else 'продать')
 
 ### №3 - exponentially weighted moving average strategy (EWMA)
 def exponentially_weighted_moving_average():
     rol_EWMA_1 = btc_usd_90Days['Close'].ewm(span=5, adjust=True, ignore_na=True).mean()
     rol_EWMA_2 = btc_usd_90Days['Close'].ewm(span=30, adjust=True, ignore_na=True).mean()
-    print('BTC-USD 90Days EWMA1:', rol_EWMA_1.iloc[-1])
-    print('BTC-USD 90Days EWMA2:', rol_EWMA_2.iloc[-1])
     print('Стратегия №3', 'купить' if rol_EWMA_1.iloc[-1] > rol_EWMA_2.iloc[-1] else 'продать')
 
 ### №4 - RSI strategy
 def relative_strength_index():
-    stock = sdf.retype(btc_usd_30Days)
+    # stock = sdf.retype(btc_usd_30Days)
     rol_RSI = stock['rsi_14'] # в книге rsi_12
     rol_RSI_result = 'ничего'
-    print('BTC-USD 30Days RSI:', rol_RSI.iloc[-1])
+    # print('BTC-USD 30Days RSI:', rol_RSI.iloc[-1])
     if rol_RSI.iloc[-1] > 70: # в книге > 90
         rol_RSI_result = 'продать'
     elif rol_RSI.iloc[-1] < 30: # в книге < 10
@@ -58,11 +55,11 @@ def relative_strength_index():
 
 ### №5 - MACD strategy
 def moving_average_convergence_divergence():
-    stock = sdf.retype(btc_usd_30Days)
+    # stock = sdf.retype(btc_usd_30Days)
     signal = stock['macds']
     macd = stock['macd']
     rol_MACD_result = 'ничего'
-    print('BTC-USD 30Days MACD:', macd.iloc[-1])
+    # print('BTC-USD 30Days MACD:', macd.iloc[-1])
     if macd.iloc[-1] > signal.iloc[-1] and macd.iloc[-2] <= signal.iloc[-2]:
         rol_MACD_result = 'купить'
     elif macd.iloc[-1] < signal.iloc[-1] and macd.iloc[-2] >= signal.iloc[-2]:
@@ -71,7 +68,7 @@ def moving_average_convergence_divergence():
 
 ### №6 - RSI and MACD strategy
 def rsi_and_macd():
-    stock = sdf.retype(btc_usd_30Days)
+    # stock = sdf.retype(btc_usd_30Days)
     rsi = stock['rsi_12']
     signal = stock['macds']
     macd = stock['macd']
@@ -86,7 +83,7 @@ def rsi_and_macd():
 
 ### №7 - Triple exponential average strategy
 def triple_exponential_average():
-    stock = sdf.retype(btc_usd_30Days)
+    # stock = sdf.retype(btc_usd_30Days)
     rol_TRIX = stock['trix_15']
     rol_TRIX_result = 'ничего'
     if rol_TRIX.iloc[-1] > 0 and rol_TRIX.iloc[-2] < 0:
@@ -98,7 +95,7 @@ def triple_exponential_average():
 
 ### №8 - Williams %R strategy
 def williams_percent_r():
-    stock = sdf.retype(btc_usd_30Days)
+    # stock = sdf.retype(btc_usd_30Days)
     rol_Williams = stock.get('wr_6')
     rol_Williams_result = 'ничего'
     if rol_Williams.iloc[-1] < 10:
@@ -112,15 +109,15 @@ def williams_percent_r():
 ### №9 - bollinger bands strategy
 def bollinger_bands():
     # print(btc_usd_30Days['Close'])
-    middle_base_line = btc_usd_30Days['Close'].mean()
-    std_line = btc_usd_30Days['Close'].std()
+    middle_base_line = btc_usd_30Days_Copy['Close'].mean()
+    std_line = btc_usd_30Days_Copy['Close'].std()
     upper_band = middle_base_line + std_line * 2
     lower_band = middle_base_line - std_line * 2
 
     rol_BB_result = 'ничего'
-    if btc_usd_30Days['Close'].iloc[-1] < lower_band:
+    if btc_usd_30Days_Copy['Close'].iloc[-1] < lower_band:
         rol_BB_result = 'купить'
-    elif btc_usd_30Days['Close'].iloc[-1] > upper_band:
+    elif btc_usd_30Days_Copy['Close'].iloc[-1] > upper_band:
         rol_BB_result = 'продать'
     print('Стратегия №9', rol_BB_result)
 
@@ -175,11 +172,11 @@ def prophet():
 rolling_window()
 simple_moving_average()
 exponentially_weighted_moving_average()
-bollinger_bands()
 relative_strength_index()
 moving_average_convergence_divergence()
 rsi_and_macd()
 triple_exponential_average()
 williams_percent_r()
+bollinger_bands()
 # sarimax()
 # prophet()
